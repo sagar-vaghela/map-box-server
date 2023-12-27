@@ -1,24 +1,17 @@
 import express from "express";
-import {
-  createUser,
-  deleteUser,
-  getUserById,
-  getUserPostsByAuthor,
-  getUsers,
-  updateUser
-} from "./src/routes/user.js";
+import userRouter from "./src/routes/user.js";
+import bodyParser from 'body-parser';
 const app = express();
 import dotenv from "dotenv"; 
 dotenv.config();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(express.json());
 
 const port = 8000;
 
-app.post("/user", createUser);
-app.get("/getusers", getUsers);
-app.get("/getuser/:id", getUserById);
-app.put("/updateuser/:id", updateUser);
-app.delete("/deleteuser/:id", deleteUser);
-app.get("/author/:author", getUserPostsByAuthor);
+app.use("/blog", userRouter);
+
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
