@@ -3,21 +3,17 @@ import pool from "../db/conn.js";
 
 export const createUser = (req, res) => {
   try {
-    const { author, title, subtitle, description, publishdate, images } =
+    const { uname,pid } =
       req.body;
     if (
-      !author ||
-      !title ||
-      !subtitle ||
-      !description ||
-      !publishdate ||
-      !images
+      !uname ||
+      !pid
     ) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
     pool.query(
-      'INSERT INTO users (author, title, subtitle, "description",publishdate,images) VALUES ($1, $2, $3, $4,$5,$6)',
-      [author, title, subtitle, description, publishdate, images],
+      'INSERT INTO users (uname,pid) VALUES ($1, $2)',
+      [uname,pid],
       (error, results) => {
         if (error) {
           console.error("Error inserting data:", error);
@@ -60,7 +56,7 @@ export const getUserById = (req, res) => {
         console.error("Error fetching data:", error);
         res.status(500).json({ error: "Internal server error" });
       } else {
-        res.status(200).json(results.rows);
+        res.status(200).json(results.rows[0]);
       }
     });
   } catch (err) {
@@ -72,21 +68,17 @@ export const getUserById = (req, res) => {
 export const updateUser = (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { author, title, subtitle, description, publishdate, images } =
+    const {uname, pid } =
       req.body;
     if (
-      !author ||
-      !title ||
-      !subtitle ||
-      !description ||
-      !publishdate ||
-      !images
+      !uname ||
+      !pid
     ) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
     pool.query(
-      'UPDATE users SET author = $1, title = $2, subtitle = $3, "description" = $4, publishdate = $5, images = $6 WHERE id = $7',
-      [author, title, subtitle, description, publishdate, images, id],
+      'UPDATE users SET uname = $1, pid = $2 WHERE id = $3',
+      [uname,pid, id],
       (error, results) => {
         if (error) {
           console.error("Error updating data:", error);
@@ -105,17 +97,48 @@ export const updateUser = (req, res) => {
   }
 };
 
+// export const deleteUser = (req, res) => {
+//   try {
+//     const id = parseInt(req.params.id);
+//     pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
+//       if (error) {
+//         console.error("Error deleting data:", error);
+//         res.status(500).json({ error: "Internal server error" });
+//       } else {
+//         res.status(200).json({
+//           msg: "Data deleted successfully",
+//           data: results.rows[0]
+//         });
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Unexpected error:", err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
+
 export const deleteUser = (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
-      if (error) {
-        console.error("Error deleting data:", error);
+
+    // Delete associated posts first
+    pool.query("DELETE FROM post WHERE uid = $1", [id], (postError) => {
+      if (postError) {
+        console.error("Error deleting associated posts:", postError);
         res.status(500).json({ error: "Internal server error" });
       } else {
-        res.status(200).json({
-          msg: "Data deleted successfully",
-          data: results.rows[0]
+        // Now you can safely delete the user
+        pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
+          if (error) {
+            console.error("Error deleting user:", error);
+            res.status(500).json({ error: "Internal server error" });
+          } else {
+            res.status(200).json({
+              msg: "User and associated posts deleted successfully",
+              data: results.rows[0],
+            });
+          }
         });
       }
     });
@@ -124,6 +147,7 @@ export const deleteUser = (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 export const getUserPostsByAuthor = (req, res) => {
   try {
