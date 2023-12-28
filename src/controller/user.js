@@ -5,6 +5,16 @@ export const createUser = (req, res) => {
   try {
     const { author, title, subtitle, description, publishdate, images } =
       req.body;
+    if (
+      !author ||
+      !title ||
+      !subtitle ||
+      !description ||
+      !publishdate ||
+      !images
+    ) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
     pool.query(
       'INSERT INTO users (author, title, subtitle, "description",publishdate,images) VALUES ($1, $2, $3, $4,$5,$6)',
       [author, title, subtitle, description, publishdate, images],
@@ -26,7 +36,6 @@ export const createUser = (req, res) => {
   }
 };
 
-
 export const getUsers = (req, res) => {
   try {
     pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
@@ -42,7 +51,6 @@ export const getUsers = (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 export const getUserById = (req, res) => {
   try {
@@ -64,7 +72,18 @@ export const getUserById = (req, res) => {
 export const updateUser = (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { author, title, subtitle, description, publishdate, images } = req.body;
+    const { author, title, subtitle, description, publishdate, images } =
+      req.body;
+    if (
+      !author ||
+      !title ||
+      !subtitle ||
+      !description ||
+      !publishdate ||
+      !images
+    ) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
     pool.query(
       'UPDATE users SET author = $1, title = $2, subtitle = $3, "description" = $4, publishdate = $5, images = $6 WHERE id = $7',
       [author, title, subtitle, description, publishdate, images, id],
@@ -109,17 +128,20 @@ export const deleteUser = (req, res) => {
 export const getUserPostsByAuthor = (req, res) => {
   try {
     const author = req.params.author;
-    pool.query("SELECT * FROM users WHERE author = $1", [author], (error, results) => {
-      if (error) {
-        console.error("Error fetching data:", error);
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        res.status(200).json(results.rows);
+    pool.query(
+      "SELECT * FROM users WHERE author = $1",
+      [author],
+      (error, results) => {
+        if (error) {
+          console.error("Error fetching data:", error);
+          res.status(500).json({ error: "Internal server error" });
+        } else {
+          res.status(200).json(results.rows);
+        }
       }
-    });
+    );
   } catch (err) {
     console.error("Unexpected error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-  
