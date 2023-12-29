@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 import pool from "../db/conn.js";
 import { errorHandler } from "../middleware/middleware.js";
 
-export const createPost = async (req, res) => {
+export const createPost = async (req, res, next) => {
   try {
     const { uid, name, title, images, description, sub_title } = req.body;
 
@@ -40,8 +40,7 @@ export const createPost = async (req, res) => {
   }
 };
 
-
-export const getPosts = async (req, res) => {
+export const getPosts = async (req, res, next) => {
   try {
     const postQuery = {
       text: "SELECT * FROM post ORDER BY post_id ASC"
@@ -56,7 +55,7 @@ export const getPosts = async (req, res) => {
   }
 };
 
-export const getPostById = async (req, res) => {
+export const getPostById = async (req, res, next) => {
   try {
     const post_id = parseInt(req.params.post_id);
     const postQuery = {
@@ -77,7 +76,7 @@ export const getPostById = async (req, res) => {
   }
 };
 
-export const getPostByUid = async (req, res) => {
+export const getPostByUid = async (req, res, next) => {
   try {
     const uid = parseInt(req.params.uid);
     const postQuery = {
@@ -98,8 +97,7 @@ export const getPostByUid = async (req, res) => {
   }
 };
 
-
-export const getPostByName = async (req, res) => {
+export const getPostByName = async (req, res, next) => {
   try {
     const name = req.params.name;
     const postQuery = {

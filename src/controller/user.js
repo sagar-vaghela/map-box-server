@@ -2,17 +2,14 @@ import { Sequelize } from "sequelize";
 import pool from "../db/conn.js";
 import { errorHandler } from "../middleware/middleware.js";
 
-export const createUser = (req, res) => {
+export const createUser = (req, res, next) => {
   try {
-    const { uname } =
-      req.body;
-    if (
-      !uname
-    ) {
+    const { uname } = req.body;
+    if (!uname) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
     pool.query(
-      'INSERT INTO users (uname) VALUES ($1)',
+      "INSERT INTO users (uname) VALUES ($1)",
       [uname],
       (error, results) => {
         if (error) {
@@ -32,7 +29,7 @@ export const createUser = (req, res) => {
   }
 };
 
-export const getUsers = (req, res) => {
+export const getUsers = (req, res, next) => {
   try {
     pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
       if (error) {
@@ -48,7 +45,7 @@ export const getUsers = (req, res) => {
   }
 };
 
-export const getUserById = (req, res) => {
+export const getUserById = (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
@@ -65,7 +62,7 @@ export const getUserById = (req, res) => {
   }
 };
 
-export const getUserPostsByName = (req, res) => {
+export const getUserPostsByName = (req, res, next) => {
   try {
     const uname = req.params.uname;
     pool.query(
