@@ -15,8 +15,8 @@ app.use(cors());
 
 const port = 8000;
 
-app.use("/blog", userRouter);
-app.use("/blogPost",postRouter)
+app.use("/", userRouter);
+app.use("/",postRouter)
 app.use("/comment",commentRouter)
 
 

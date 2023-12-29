@@ -4,17 +4,16 @@ import { errorHandler } from "../middleware/middleware.js";
 
 export const createUser = (req, res) => {
   try {
-    const { uname,pid } =
+    const { uname } =
       req.body;
     if (
-      !uname ||
-      !pid
+      !uname
     ) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
     pool.query(
-      'INSERT INTO users (uname,pid) VALUES ($1, $2)',
-      [uname,pid],
+      'INSERT INTO users (uname) VALUES ($1)',
+      [uname],
       (error, results) => {
         if (error) {
           console.error("Error inserting data:", error);

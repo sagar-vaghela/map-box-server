@@ -4,15 +4,28 @@ import { errorHandler } from "../middleware/middleware.js";
 
 export const createPost = async (req, res) => {
   try {
-    const { name, title, images, description, sub_title } = req.body;
+    const { uid, name, title, images, description, sub_title } = req.body;
 
-    if (!name) {
+    if (!uid || !name || !title || !images || !description || !sub_title) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
+    // Check if the user with the specified uid exists
+    const userQuery = {
+      text: "SELECT id FROM users WHERE id = $1",
+      values: [uid]
+    };
+
+    const userResult = await pool.query(userQuery);
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // If the user exists, insert the post
     const postQuery = {
-      text: "INSERT INTO post ( name, title, images, description, sub_title) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      values: [name, title, images, description, sub_title]
+      text: "INSERT INTO post ( uid, name, title, images, description, sub_title) VALUES ($1, $2, $3,$4,$5,$6) RETURNING *",
+      values: [uid, name, title, images, description, sub_title]
     };
 
     const postResult = await pool.query(postQuery);
@@ -26,6 +39,7 @@ export const createPost = async (req, res) => {
     errorHandler(err, req, res, next);
   }
 };
+
 
 export const getPosts = async (req, res) => {
   try {
@@ -62,6 +76,28 @@ export const getPostById = async (req, res) => {
     errorHandler(err, req, res, next);
   }
 };
+
+export const getPostByUid = async (req, res) => {
+  try {
+    const uid = parseInt(req.params.uid);
+    const postQuery = {
+      text: "SELECT * FROM post WHERE uid = $1",
+      values: [uid]
+    };
+
+    const postResult = await pool.query(postQuery);
+
+    if (postResult.rows.length === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    res.status(200).json(postResult.rows);
+  } catch (err) {
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
+  }
+};
+
 
 export const getPostByName = async (req, res) => {
   try {
