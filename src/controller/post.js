@@ -1,43 +1,6 @@
 import { Sequelize } from "sequelize";
 import pool from "../db/conn.js";
-
-// export const createPost = async (req, res) => {
-//   try {
-//     const { postid, uid, name } = req.body;
-
-//     if (!uid || !name) {
-//       return res.status(400).json({ error: "Missing required parameters" });
-//     }
-
-//     // Check if the user with the specified uid exists
-//     const userQuery = {
-//       text: 'SELECT id FROM users WHERE id = $1',
-//       values: [uid],
-//     };
-
-//     const userResult = await pool.query(userQuery);
-
-//     if (userResult.rows.length === 0) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-
-//     // If the user exists, insert the post
-//     const postQuery = {
-//       text: 'INSERT INTO post (postid, uid, name) VALUES ($1, $2, $3) RETURNING *',
-//       values: [postid, uid, name],
-//     };
-
-//     const postResult = await pool.query(postQuery);
-
-//     res.status(201).json({
-//       msg: "Data inserted successfully",
-//       data: postResult.rows[0],
-//     });
-//   } catch (err) {
-//     console.error("Unexpected error:", err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
+import { errorHandler } from "../middleware/middleware.js";
 
 export const createPost = async (req, res) => {
   try {
@@ -46,28 +9,6 @@ export const createPost = async (req, res) => {
     if (!name) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
-
-    // const userQuery = {
-    //   text: "SELECT id FROM users WHERE id = $1",
-    //   values: [uid]
-    // };
-
-    // const userResult = await pool.query(userQuery);
-
-    // if (userResult.rows.length === 0) {
-    //   return res.status(404).json({ error: "User not found" });
-    // }
-
-    // const existingPostQuery = {
-    //   text: 'SELECT postid FROM post WHERE postid = $1',
-    //   values: [postid],
-    // };
-
-    // const existingPostResult = await pool.query(existingPostQuery);
-
-    // if (existingPostResult.rows.length > 0) {
-    //   return res.status(409).json({ error: "Duplicate postid found" });
-    // }
 
     const postQuery = {
       text: "INSERT INTO post ( name, title, images, description, sub_title) VALUES ($1, $2, $3, $4, $5) RETURNING *",
@@ -81,8 +22,8 @@ export const createPost = async (req, res) => {
       data: postResult.rows[0]
     });
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
 
@@ -96,8 +37,8 @@ export const getPosts = async (req, res) => {
 
     res.status(200).json(postResult.rows);
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
 
@@ -117,7 +58,28 @@ export const getPostById = async (req, res) => {
 
     res.status(200).json(postResult.rows[0]);
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
+  }
+};
+
+export const getPostByName = async (req, res) => {
+  try {
+    const name = req.params.name;
+    const postQuery = {
+      text: "SELECT * FROM post WHERE name = $1",
+      values: [name]
+    };
+
+    const postResult = await pool.query(postQuery);
+
+    if (postResult.rows.length === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    res.status(200).json(postResult.rows[0]);
+  } catch (err) {
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };

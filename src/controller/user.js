@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import pool from "../db/conn.js";
+import { errorHandler } from "../middleware/middleware.js";
 
 export const createUser = (req, res) => {
   try {
@@ -27,8 +28,8 @@ export const createUser = (req, res) => {
       }
     );
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
 
@@ -43,8 +44,8 @@ export const getUsers = (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
 
@@ -60,101 +61,17 @@ export const getUserById = (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
 
-export const updateUser = (req, res) => {
+export const getUserPostsByName = (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    const {uname, pid } =
-      req.body;
-    if (
-      !uname ||
-      !pid
-    ) {
-      return res.status(400).json({ error: "Missing required parameters" });
-    }
+    const uname = req.params.uname;
     pool.query(
-      'UPDATE users SET uname = $1, pid = $2 WHERE id = $3',
-      [uname,pid, id],
-      (error, results) => {
-        if (error) {
-          console.error("Error updating data:", error);
-          res.status(500).json({ error: "Internal server error" });
-        } else {
-          res.status(200).json({
-            msg: "Data updated successfully",
-            data: results.rows[0]
-          });
-        }
-      }
-    );
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// export const deleteUser = (req, res) => {
-//   try {
-//     const id = parseInt(req.params.id);
-//     pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
-//       if (error) {
-//         console.error("Error deleting data:", error);
-//         res.status(500).json({ error: "Internal server error" });
-//       } else {
-//         res.status(200).json({
-//           msg: "Data deleted successfully",
-//           data: results.rows[0]
-//         });
-//       }
-//     });
-//   } catch (err) {
-//     console.error("Unexpected error:", err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-
-export const deleteUser = (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-
-    // Delete associated posts first
-    pool.query("DELETE FROM post WHERE uid = $1", [id], (postError) => {
-      if (postError) {
-        console.error("Error deleting associated posts:", postError);
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        // Now you can safely delete the user
-        pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
-          if (error) {
-            console.error("Error deleting user:", error);
-            res.status(500).json({ error: "Internal server error" });
-          } else {
-            res.status(200).json({
-              msg: "User and associated posts deleted successfully",
-              data: results.rows[0],
-            });
-          }
-        });
-      }
-    });
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
-export const getUserPostsByAuthor = (req, res) => {
-  try {
-    const author = req.params.author;
-    pool.query(
-      "SELECT * FROM users WHERE author = $1",
-      [author],
+      "SELECT * FROM users WHERE uname = $1",
+      [uname],
       (error, results) => {
         if (error) {
           console.error("Error fetching data:", error);
@@ -165,7 +82,7 @@ export const getUserPostsByAuthor = (req, res) => {
       }
     );
   } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: "Internal server error" });
+    errorHandler(err, req, res, next);
   }
 };
